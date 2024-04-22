@@ -52,7 +52,10 @@
                     </tr>
                   </thead>
                   <tbody>
-                    
+                    <tr v-for="move in filtered_moves(selected_pokemon)" :key="move.move.name">
+                      <td>{{ move.version_group_details[0].level_learned_at }}</td>
+                      <td>{{ move.move.name }}</td>
+                    </tr>
                   </tbody>
                 </template>
               </v-table>
@@ -70,7 +73,6 @@
 </template>
 
 <script>
-//import { languagesOptions } from "/src/components/language.js";
 import axios from 'axios';
 export default {
   name: 'App',
@@ -80,8 +82,6 @@ export default {
       search: "",
       show_dialog: false,
       selected_pokemon: null,
-      moves: []
-
     };
   },
   mounted() {
@@ -93,9 +93,7 @@ export default {
     get_id(pokemon) {
       return Number(pokemon.url.split("/")[6]);
     },
-    get_name(pokemon) {
-      return pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
-    },
+    
     show_pokemon(id) {
       axios.get(`https://pokeapi.co/api/v2/pokemon/${id}`).then((response) => {
         this.selected_pokemon = response.data;
@@ -104,10 +102,11 @@ export default {
     },
     filter_moves(pokemon) {
       return pokemon.moves.filter((item) => {
-        let include =false;
-        for(let version of item.version_group_details) {
-          if(version.version_group.name == "sword-dance") {
+        let include = false;
+        for (let version of item.version_group_details) {
+          if (version.version_group !== "") {
             include = true;
+            break; // Não precisamos continuar iterando se encontrarmos pelo menos uma versão não vazia
           }
         }
         return include;
@@ -123,7 +122,6 @@ export default {
   },
 };
 </script>
-
 <style>
 .background-image {
   background-image: url('/src/assets/background.png');
